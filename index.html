@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khoje Restaurant | Jaipur</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        amberGold: '#D4AF37',
+                        amberAccent: '#E0A96D',
+                        amberDark: '#997A15',
+                        charcoalDark: '#0D0D0D',
+                        charcoalCard: '#171717',
+                        charcoalLight: '#262626',
+                        warmCream: '#FDFBF7',
+                    },
+                    fontFamily: {
+                        playfair: ['"Playfair Display"', 'serif'],
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome & Lucide Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0D0D0D;
+            color: #FDFBF7;
+        }
+        h1, h2, h3, h4, h5, h6, .font-playfair {
+            font-family: 'Playfair Display', serif;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0D0D0D;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D4AF37;
+            border-radius: 4px;
+        }
+        .tab-transition {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-charcoalDark text-warmCream min-h-screen flex flex-col selection:bg-amberGold selection:text-black">
+
+    <!-- Toast / Notification Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <!-- Lightbox Modal for Gallery -->
+    <div id="lightbox-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
+        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-warmCream hover:text-amberGold bg-white/10 p-3 rounded-full transition">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <div class="max-w-4xl max-h-[85vh] relative flex flex-col items-center">
+            <img id="lightbox-img" src="" alt="Enlarged view" class="max-h-[75vh] max-w-full rounded-2xl object-contain shadow-2xl border border-white/10">
+            <h3 id="lightbox-title" class="text-warmCream font-playfair text-xl mt-4 text-center"></h3>
+        </div>
+    </div>
+<!-- Top Announcement Bar -->
+    <div class="bg-amberGold text-charcoalDark text-xs sm:text-sm font-semibold py-2 px-4 text-center flex items-center justify-center space-x-4">
+        <span>👑 Jaipur's Premier Dining & Lounge Destination</span>
+        <span class="hidden md:inline">•</span>
+        <span class="hidden md:inline">📍 C Scheme, Ashok Nagar, Jaipur</span>
+        <a href="#reservations" onclick="switchTab('reservations')" class="underline font-bold hover:text-white transition ml-2">Book Table</a>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="sticky top-0 z-30 bg-charcoalDark/95 backdrop-blur-md border-b border-white/10 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#" onclick="switchTab('home')" class="flex items-center space-x-3 group">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-amberDark to-amberGold flex items-center justify-center shadow-lg transform group-hover:scale-105 transition">
+                    <i class="fa-solid fa-utensils text-charcoalDark text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-2xl sm:text-3xl font-playfair font-bold tracking-wider text-warmCream">KHOJE</span>
+                    <span class="block text-[10px] tracking-widest text-amberGold uppercase">Restaurant & Lounge</span>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex items-center space-x-8">
+                <button onclick="switchTab('home')" id="nav-home" class="nav-btn text-amberGold font-medium transition hover:text-amberGold py-2 border-b-2 border-amberGold">Home</button>
+                <button onclick="switchTab('menu')" id="nav-menu" class="nav-btn text-warmCream/80 hover:text-amberGold font-medium transition py-2 border-b-2 border-transparent">Menu</button>
+                <button onclick="switchTab('about')" id="nav-about" class="nav-btn text-warmCream/80 hover:text-amberGold font-medium transition py-2 border-b-2 border-transparent">Our Story</button>
+                <button onclick="switchTab('gallery')" id="nav-gallery" class="nav-btn text-warmCream/80 hover:text-amberGold font-medium transition py-2 border-b-2 border-transparent">Gallery</button>
+                <button onclick="switchTab('reservations')" id="nav-reservations" class="nav-btn text-warmCream/80 hover:text-amberGold font-medium transition py-2 border-b-2 border-transparent">Reservations & Contact</button>
+            </nav>
+
+            <!-- Action Button & Mobile Menu Toggle -->
+            <div class="flex items-center space-x-3">
+                <a href="tel:08690133358" class="hidden sm:inline-flex items-center space-x-2 border border-amberGold text-amberGold hover:bg-amberGold hover:text-charcoalDark px-4 py-2 rounded-full font-medium text-sm transition shadow-sm">
+                    <i class="fa-solid fa-phone text-xs"></i>
+                    <span>086901 33358</span>
+                </a>
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg text-warmCream hover:bg-white/10 focus:outline-none">
+                    <i class="fa-solid fa-bars text-xl" id="menu-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Drawer -->
+        <div id="mobile-menu" class="hidden md:hidden bg-charcoalCard border-b border-white/10 px-6 py-6 space-y-4 shadow-xl">
+            <button onclick="switchTab('home'); toggleMobileMenu();" class="block w-full text-left text-lg font-medium py-2 border-b border-white/5 text-amberGold">Home</button>
+            <button onclick="switchTab('menu'); toggleMobileMenu();" class="block w-full text-left text-lg font-medium py-2 border-b border-white/5 text-warmCream hover:text-amberGold">Menu</button>
+            <button onclick="switchTab('about'); toggleMobileMenu();" class="block w-full text-left text-lg font-medium py-2 border-b border-white/5 text-warmCream hover:text-amberGold">Our Story</button>
+            <button onclick="switchTab('gallery'); toggleMobileMenu();" class="block w-full text-left text-lg font-medium py-2 border-b border-white/5 text-warmCream hover:text-amberGold">Gallery</button>
+            <button onclick="switchTab('reservations'); toggleMobileMenu();" class="block w-full text-left text-lg font-medium py-2 text-warmCream hover:text-amberGold">Reservations & Contact</button>
+            <div class="pt-4 flex flex-col space-y-3">
+                <a href="tel:08690133358" class="flex items-center justify-center space-x-2 bg-amberGold text-charcoalDark font-semibold py-3 rounded-xl shadow-md">
+                    <i class="fa-solid fa-phone"></i>
+                    <span>Call 086901 33358</span>
+                </a>
+                <a href="https://wa.me/918690133358?text=Hi%20Khoje%20Restaurant,%20I%20would%20like%20to%20inquire%20about%20table%20reservation." target="_blank" class="flex items-center justify-center space-x-2 bg-emerald-600 text-white font-semibold py-3 rounded-xl shadow-md">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <span>WhatsApp Chat</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- FLOATING QUICK ACTIONS (WhatsApp & Call) -->
+    <div class="fixed bottom-6 left-6 z-40 flex flex-col space-y-3">
+        <a href="https://wa.me/918690133358?text=Hello%20Khoje%20Restaurant,%20I%20am%20visiting%20your%20website%20and%20want%20to%20know%20more." target="_blank" title="Chat on WhatsApp" class="w-14 h-14 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-2xl transition transform hover:scale-110">
+            <i class="fa-brands fa-whatsapp text-2xl"></i>
+        </a>
+        <a href="tel:08690133358" title="Call Restaurant" class="w-14 h-14 bg-amberGold hover:bg-amberAccent text-charcoalDark rounded-full flex items-center justify-center shadow-2xl transition transform hover:scale-110">
+            <i class="fa-solid fa-phone text-xl"></i>
+        </a>
+    </div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow">
+
+        <!-- ================= PAGE 1: HOME ================= -->
+        <section id="page-home" class="tab-page tab-transition">
+            <!-- Hero Section -->
+            <div class="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-charcoalDark">
+                <div class="absolute inset-0 z-0">
+                    <img src="assets/12-interior-seating.jpg" alt="Khoje Restaurant Interior" class="w-full h-full object-cover opacity-35 filter brightness-75 scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-charcoalDark via-charcoalDark/60 to-transparent"></div>
+                </div>
+
+                <div class="relative z-10 max-w-5xl mx-auto px-4 text-center py-20">
+                    <div class="inline-flex items-center space-x-2 bg-amberGold/15 border border-amberGold/30 text-amberGold px-4 py-1.5 rounded-full text-sm font-semibold mb-6 backdrop-blur-sm">
+                        <i class="fa-solid fa-star text-amberGold"></i>
+                        <span>Jaipur's Culinary Masterpiece • C Scheme, Ashok Nagar</span>
+                    </div>
+                    <h1 class="text-4xl sm:text-6xl md:text-7xl font-playfair font-bold tracking-tight text-warmCream mb-6 leading-tight">
+                        Where Royal Heritage <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-amberGold via-yellow-200 to-amberAccent">Meets Modern Dining</span>
+                    </h1>
+                    <p class="text-lg sm:text-xl text-warmCream/80 max-w-2xl mx-auto mb-10 font-light leading-relaxed">
+                        Experience exceptional flavors, exquisite ambience, and unmatched hospitality at Khoje Restaurant.
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <button onclick="switchTab('reservations')" class="w-full sm:w-auto bg-amberGold hover:bg-amberAccent text-charcoalDark font-bold px-8 py-4 rounded-full transition transform hover:-translate-y-0.5 shadow-2xl flex items-center justify-center space-x-2">
+                            <i class="fa-regular fa-calendar-days"></i>
+                            <span>Reserve a Table Now</span>
+                        </button>
+                        <button onclick="switchTab('menu')" class="w-full sm:w-auto bg-white/10 hover:bg-white/20 border border-white/20 text-warmCream font-semibold px-8 py-4 rounded-full transition backdrop-blur-sm flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-book-open"></i>
+                            <span>Explore Our Menu</span>
+                        </button>
+                    </div>
+
+                    <!-- Quick Stats Cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 pt-12 border-t border-white/10 max-w-4xl mx-auto">
+                        <div class="bg-charcoalCard/90 backdrop-blur-md p-4 rounded-2xl border border-white/5 shadow-xl">
+                            <div class="flex items-center justify-center space-x-1.5 text-amberGold mb-1">
+                                <i class="fa-solid fa-star text-amberGold"></i>
+                                <span class="text-2xl font-bold font-playfair">4.7 / 5.0</span>
+                            </div>
+                            <p class="text-xs text-warmCream/60">588+ Google Reviews</p>
+                        </div>
+                        <div class="bg-charcoalCard/90 backdrop-blur-md p-4 rounded-2xl border border-white/5 shadow-xl">
+                            <div class="text-2xl font-bold font-playfair text-amberGold mb-1">10 AM - 11 PM</div>
+                            <p class="text-xs text-warmCream/60">Open Daily in Jaipur</p>
+                        </div>
+                        <div class="bg-charcoalCard/90 backdrop-blur-md p-4 rounded-2xl border border-white/5 shadow-xl">
+                            <div class="text-2xl font-bold font-playfair text-amberGold mb-1">C Scheme</div>
+                            <p class="text-xs text-warmCream/60">Ashok Nagar Hub</p>
+                        </div>
+                        <div class="bg-charcoalCard/90 backdrop-blur-md p-4 rounded-2xl border border-white/5 shadow-xl">
+                            <div class="text-2xl font-bold font-playfair text-amberGold mb-1">Fine Dining</div>
+                            <p class="text-xs text-warmCream/60">Multi-Cuisine & Bar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Highlights Section -->
+            <section class="py-20 bg-charcoalLight/30 px-4 sm:px-6 lg:px-8">
+                <div class="max-w-7xl mx-auto">
+                    <div class="text-center max-w-2xl mx-auto mb-16">
+                        <span class="text-amberGold text-sm font-semibold tracking-widest uppercase">Culinary Excellence</span>
+                        <h2 class="text-3xl sm:text-4xl font-playfair font-bold mt-2 text-warmCream">Signature Culinary Offerings</h2>
+                        <div class="w-20 h-1 bg-amberGold mx-auto mt-4 rounded-full"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="bg-charcoalCard rounded-3xl overflow-hidden border border-white/5 group hover:border-amberGold/50 transition duration-300 shadow-xl flex flex-col justify-between">
+                            <div class="relative h-64 overflow-hidden">
+                                <img src="assets/13-interior-dining.jpg" alt="Rajasthani Royal Thali" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                                <span class="absolute top-4 right-4 bg-amberGold text-charcoalDark font-bold text-xs px-3 py-1 rounded-full uppercase shadow-md">Chef Special</span>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex items-center space-x-1 text-red-400 text-xs mb-2">
+                                    <i class="fa-solid fa-pepper-hot"></i>
+                                    <i class="fa-solid fa-pepper-hot"></i>
+                                    <span class="text-warmCream/60 ml-1">Spicy & Rich</span>
+                                </div>
+                                <h3 class="text-xl font-playfair font-bold text-warmCream mb-2">Authentic Rajasthani Thali</h3>
+                                <p class="text-warmCream/70 text-sm mb-4">Dal Baati Churma, Gatte ki Sabzi, Ker Sangri, and traditional sweets crafted with pure ghee.</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-amberGold font-bold text-lg">₹650</span>
+                                    <button onclick="switchTab('menu')" class="text-xs font-semibold uppercase tracking-wider text-amberGold hover:underline flex items-center space-x-1">
+                                        <span>View Details</span>
+                                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-charcoalCard rounded-3xl overflow-hidden border border-white/5 group hover:border-amberGold/50 transition duration-300 shadow-xl flex flex-col justify-between">
+                            <div class="relative h-64 overflow-hidden">
+                                <img src="assets/01-table-and-food.jpg" alt="Tandoori Platters" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                                <span class="absolute top-4 right-4 bg-amberGold text-charcoalDark font-bold text-xs px-3 py-1 rounded-full uppercase shadow-md">Bestseller</span>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex items-center space-x-1 text-amberGold text-xs mb-2">
+                                    <i class="fa-solid fa-pepper-hot"></i>
+                                    <span class="text-warmCream/60 ml-1">Medium Spicy</span>
+                                </div>
+                                <h3 class="text-xl font-playfair font-bold text-warmCream mb-2">Smoked Tandoori Platters</h3>
+                                <p class="text-warmCream/70 text-sm mb-4">Succulent kebabs and paneer tikka marinated in secret spices and slow-cooked in a traditional clay oven.</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-amberGold font-bold text-lg">₹480</span>
+                                    <button onclick="switchTab('menu')" class="text-xs font-semibold uppercase tracking-wider text-amberGold hover:underline flex items-center space-x-1">
+                                        <span>View Details</span>
+                                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-charcoalCard rounded-3xl overflow-hidden border border-white/5 group hover:border-amberGold/50 transition duration-300 shadow-xl flex flex-col justify-between">
+                            <div class="relative h-64 overflow-hidden">
+                                <img src="assets/02-avocado-toast.jpg" alt="Continental Delicacies" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                                <span class="absolute top-4 right-4 bg-amberGold text-charcoalDark font-bold text-xs px-3 py-1 rounded-full uppercase shadow-md">Popular</span>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex items-center space-x-1 text-amberGold text-xs mb-2">
+                                    <i class="fa-solid fa-leaf text-emerald-400"></i>
+                                    <span class="text-warmCream/60 ml-1">Herbal & Fresh</span>
+                                </div>
+                                <h3 class="text-xl font-playfair font-bold text-warmCream mb-2">Woodfired Continental Pizza</h3>
+                                <p class="text-warmCream/70 text-sm mb-4">Hand-tossed artisan pizzas loaded with fresh mozzarella, exotic vegetables, and aromatic Italian herbs.</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-amberGold font-bold text-lg">₹520</span>
+                                    <button onclick="switchTab('menu')" class="text-xs font-semibold uppercase tracking-wider text-amberGold hover:underline flex items-center space-x-1">
+                                        <span>View Details</span>
+                                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-12">
+                        <button onclick="switchTab('menu')" class="bg-transparent hover:bg-amberGold text-amberGold hover:text-charcoalDark border border-amberGold font-semibold px-8 py-3.5 rounded-full transition duration-300 inline-flex items-center space-x-2">
+                            <span>Browse Full Menu & Pricing</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Testimonials Section -->
+            <section class="py-20 bg-charcoalDark px-4 sm:px-6 lg:px-8 border-t border-white/5">
+                <div class="max-w-7xl mx-auto">
+                    <div class="text-center max-w-2xl mx-auto mb-16">
+                        <span class="text-amberGold text-sm font-semibold tracking-widest uppercase">Guest Reviews</span>
+                        <h2 class="text-3xl sm:text-4xl font-playfair font-bold mt-2 text-warmCream">What Our Patrons Say</h2>
+                        <div class="w-20 h-1 bg-amberGold mx-auto mt-4 rounded-full"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="bg-charcoalCard p-8 rounded-3xl border border-white/5 relative shadow-xl">
+                            <div class="flex items-center space-x-1 text-amberGold mb-4">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <p class="text-warmCream/80 text-sm italic mb-6">"Khoje Restaurant in C Scheme is an absolute gem! The authentic Rajasthani thali transported us straight to royal kitchens. Impeccable service and sophisticated ambience."</p>
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-amberGold/20 text-amberGold font-bold flex items-center justify-center font-playfair">RS</div>
+                                <div>
+                                    <h4 class="font-bold text-warmCream text-sm">Rahul Sharma</h4>
+                                    <p class="text-xs text-warmCream/60">Local Guide • 142 Reviews</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-charcoalCard p-8 rounded-3xl border border-white/5 relative shadow-xl">
+                            <div class="flex items-center space-x-1 text-amberGold mb-4">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <p class="text-warmCream/80 text-sm italic mb-6">"Visited with family last weekend. The continental dishes and mocktails were outstanding. Ashok Nagar parking is convenient, and the interior lighting is gorgeous."</p>
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-amberGold/20 text-amberGold font-bold flex items-center justify-center font-playfair">AP</div>
+                                <div>
+                                    <h4 class="font-bold text-warmCream text-sm">Ananya Pareek</h4>
+                                    <p class="text-xs text-warmCream/60">Jaipur Food Blogger</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-charcoalCard p-8 rounded-3xl border border-white/5 relative shadow-xl">
+                            <div class="flex items-center space-x-1 text-amberGold mb-4">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <p class="text-warmCream/80 text-sm italic mb-6">"Easily one of the best 4.7 rated dining spots in Jaipur. Quick reservation response, polite staff, and exceptional hygiene standards. Highly recommended!"</p>
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-amberGold/20 text-amberGold font-bold flex items-center justify-center font-playfair">VK</div>
+                                <div>
+                                    <h4 class="font-bold text-warmCream text-sm">Vikram Khandelwal</h4>
+                                    <p class="text-xs text-warmCream/60">Verified Diner</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- ================= PAGE 2: MENU ================= -->
+        <section id="page-menu" class="tab-page tab-transition hidden py-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+            <div class="text-center max-w-3xl mx-auto">
+                <span class="text-amberGold text-sm font-semibold tracking-widest uppercase">The Current Menu</span>
+                <h2 class="text-3xl sm:text-5xl font-playfair font-bold mt-2 text-warmCream">Explore the Menu</h2>
+                <p class="text-warmCream/70 mt-4 leading-relaxed">For the latest dishes, menu photos and prices, view the menu published on Khoje Restaurant’s Google Maps listing. This keeps menu information linked to the restaurant’s own listing instead of displaying an outdated or unverified menu here.</p>
+                <div class="w-20 h-1 bg-amberGold mx-auto mt-6 rounded-full"></div>
+                <a href="https://www.google.com/maps/place/Khoje+Restaurant/@26.9144855,75.8032177,15z/data=!4m16!1m8!3m7!1s0x396db572ff3b90af:0x79095d14f40436c8!2sKhoje+Restaurant!8m2!3d26.9144855!4d75.8032177!10e9!16s%2Fg%2F11nb4n5mb1!3m6!1s0x396db572ff3b90af:0x79095d14f40436c8!8m2!3d26.9144855!4d75.8032177!10e9!16s%2Fg%2F11nb4n5mb1?entry=ttu&g_ep=EgoyMDI2MTEwOC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-3 mt-10 bg-amberGold hover:bg-amberAccent text-charcoalDark font-bold px-8 py-4 rounded-full transition shadow-xl">
+                    <i class="fa-brands fa-google"></i><span>View Menu on Google Maps</span><i class="fa-solid fa-arrow-up-right-from-square text-sm"></i>
+                </a>
+                <p class="text-xs text-warmCream/50 mt-4">Menu availability, items and prices may change. Please confirm details with the restaurant.</p>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 3: OUR STORY ================= -->
+        <section id="page-about" class="tab-page tab-transition hidden py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-amberGold text-sm font-semibold tracking-widest uppercase">Our Heritage & Story</span>
+                <h2 class="text-3xl sm:text-5xl font-playfair font-bold mt-2 text-warmCream">Welcome to Khoje Restaurant</h2>
+                <p class="text-warmCream/70 mt-3">Rooted in the Pink City's vibrant culture, bringing authentic culinary distinction to C Scheme, Ashok Nagar, Jaipur.</p>
+                <div class="w-20 h-1 bg-amberGold mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <!-- Story Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+                <div class="space-y-6">
+                    <h3 class="text-2xl sm:text-3xl font-playfair font-bold text-amberGold">A Passion for Fine Gastronomy</h3>
+                    <p class="text-warmCream/80 leading-relaxed">
+                        Located in the upscale neighborhood of C Scheme, Ashok Nagar, Jaipur, <strong class="text-amberGold">Khoje Restaurant</strong> was founded with a singular vision: to create an immersive dining sanctuary where traditional Rajasthani heritage recipes harmonize seamlessly with global continental mastery.
+                    </p>
+                    <p class="text-warmCream/80 leading-relaxed">
+                        Our master chefs handpick indigenous spices directly from local Jaipur markets, blending age-old slow-cooking techniques with modern culinary presentation. Whether you are seeking a cozy family dinner or a vibrant evening out, Khoje offers an unforgettable atmosphere with a stellar 4.7/5 rating from over 588 delighted patrons.
+                    </p>
+                    <div class="grid grid-cols-2 gap-4 pt-4">
+                        <div class="bg-charcoalCard p-4 rounded-2xl border border-white/5 shadow-md">
+                            <span class="block text-amberGold text-2xl font-bold font-playfair">100%</span>
+                            <span class="text-xs text-warmCream/60">Authentic Ingredients</span>
+                        </div>
+                        <div class="bg-charcoalCard p-4 rounded-2xl border border-white/5 shadow-md">
+                            <span class="block text-amberGold text-2xl font-bold font-playfair">4.7 / 5</span>
+                            <span class="text-xs text-warmCream/60">Average Guest Rating</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="absolute -inset-2 bg-gradient-to-r from-amberGold to-amberDark rounded-3xl blur opacity-35"></div>
+                    <div class="relative bg-charcoalCard rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+                        <img src="assets/03-food-photo.jpg" alt="Restaurant Ambiance" class="w-full h-[400px] object-cover">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chef & Ambience Pillars -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-charcoalCard p-8 rounded-3xl border border-white/5 text-center shadow-xl">
+                    <div class="w-16 h-16 rounded-full bg-amberGold/10 text-amberGold flex items-center justify-center mx-auto mb-6 text-2xl">
+                        <i class="fa-solid fa-hat-chef"></i>
+                    </div>
+                    <h4 class="text-xl font-playfair font-bold text-warmCream mb-3">Master Culinary Art</h4>
+                    <p class="text-warmCream/70 text-sm">Every recipe is meticulously crafted by veteran chefs with decades of experience in royal Rajasthani and international cuisines.</p>
+                </div>
+
+                <div class="bg-charcoalCard p-8 rounded-3xl border border-white/5 text-center shadow-xl">
+                    <div class="w-16 h-16 rounded-full bg-amberGold/10 text-amberGold flex items-center justify-center mx-auto mb-6 text-2xl">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h4 class="text-xl font-playfair font-bold text-warmCream mb-3">Sophisticated Ambiance</h4>
+                    <p class="text-warmCream/70 text-sm">Warm ambient lighting, aesthetic wooden & brass accents, and comfortable seating designed for memorable gatherings.</p>
+                </div>
+
+                <div class="bg-charcoalCard p-8 rounded-3xl border border-white/5 text-center shadow-xl">
+                    <div class="w-16 h-16 rounded-full bg-amberGold/10 text-amberGold flex items-center justify-center mx-auto mb-6 text-2xl">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <h4 class="text-xl font-playfair font-bold text-warmCream mb-3">Prime Location</h4>
+                    <p class="text-warmCream/70 text-sm">Centrally situated in C Scheme, Ashok Nagar, Jaipur, making it easily accessible with ample parking and valet service.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 4: GALLERY ================= -->
+        <section id="page-gallery" class="tab-page tab-transition hidden py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="text-amberGold text-sm font-semibold tracking-widest uppercase">Visual Showcase</span>
+                <h2 class="text-3xl sm:text-5xl font-playfair font-bold mt-2 text-warmCream">Ambiance & Culinary Gallery</h2>
+                <p class="text-warmCream/70 mt-3">A selection of photos shared for Khoje Restaurant. Click any photo to view it larger.</p>
+                <div class="w-20 h-1 bg-amberGold mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <!-- Gallery Category Filters -->
+            <div class="flex flex-wrap items-center justify-center gap-2 mb-10">
+                <button onclick="filterGallery('all')" id="gal-all" class="gal-cat-btn px-5 py-2.5 rounded-xl text-sm font-semibold bg-amberGold text-charcoalDark transition shadow-sm">All Photos</button>
+                <button onclick="filterGallery('food')" id="gal-food" class="gal-cat-btn px-5 py-2.5 rounded-xl text-sm font-semibold bg-charcoalCard text-warmCream/80 hover:text-amberGold border border-white/10 transition">Food Photos</button>
+                <button onclick="filterGallery('interior')" id="gal-interior" class="gal-cat-btn px-5 py-2.5 rounded-xl text-sm font-semibold bg-charcoalCard text-warmCream/80 hover:text-amberGold border border-white/10 transition">Restaurant Interior</button>
+                <button onclick="filterGallery('drinks')" id="gal-drinks" class="gal-cat-btn px-5 py-2.5 rounded-xl text-sm font-semibold bg-charcoalCard text-warmCream/80 hover:text-amberGold border border-white/10 transition">Drinks</button>
+            </div>
+
+            <!-- Gallery Grid -->
+            <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <!-- Populated via JS -->
+            </div>
+            <div class="text-center mt-12">
+                <a href="https://www.google.com/maps/place/Khoje+Restaurant/@26.9144855,75.8032177,3a,75y,90t/data=!3m8!1e2!3m6!1sCIABIhAyJxKsz2xyEldRBpDMVLln!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgrass-cs%2FAABkmLd5qs6y0ww-38R5ITUIx3IX_pwtohJy_YDhNK_XN4gjrW7hjBCa-9Yw7Zqm1EZ-bjHN92hc2Nf9C-o6OKpkU6yByTUcO_SVgSEqeCLhaoy9A0Eqzhq4Cfgfn41_VCaB4dGFFua10IyO0vBG%3Dw129-h86-k-no!7i7008!8i4672!4m16!1m8!3m7!1s0x396db572ff3b90af:0x79095d14f40436c8!2sKhoje+Restaurant!8m2!3d26.9144855!4d75.8032177!10e9!16s%2Fg%2F11nb4n5mb1!3m6!1s0x396db572ff3b90af:0x79095d14f40436c8!8m2!3d26.9144855!4d75.8032177!10e5!16s%2Fg%2F11nb4n5mb1?entry=ttu&g_ep=EgoyMDI2MTEwOC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-3 border border-amberGold text-amberGold hover:bg-amberGold hover:text-charcoalDark font-semibold px-7 py-3.5 rounded-full transition">
+                    <i class="fa-brands fa-google"></i><span>View More Photos on Google Maps</span><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 5: RESERVATIONS & CONTACT ================= -->
+        <section id="page-reservations" class="tab-page tab-transition hidden py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-amberGold text-sm font-semibold tracking-widest uppercase">Connect & Reserve</span>
+                <h2 class="text-3xl sm:text-5xl font-playfair font-bold mt-2 text-warmCream">Table Reservation & Contact</h2>
+                <p class="text-warmCream/70 mt-3">Send a table request to the restaurant on WhatsApp. Your booking is confirmed only after the restaurant replies.</p>
+                <div class="w-20 h-1 bg-amberGold mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                <!-- Reservation Form (7 Cols) -->
+                <div class="lg:col-span-7 bg-charcoalCard p-8 sm:p-10 rounded-3xl border border-white/10 shadow-2xl">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 rounded-full bg-amberGold/10 text-amberGold flex items-center justify-center">
+                            <i class="fa-regular fa-calendar-check text-lg"></i>
+                        </div>
+                        <h3 class="text-2xl font-playfair font-bold text-warmCream">Request a Table on WhatsApp</h3>
+                    </div>
+
+                    <form id="reservation-form" onsubmit="handleReservation(event)" class="space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-warmCream/80 mb-2">Full Name *</label>
+                                <input type="text" id="res-name" required placeholder="e.g. Rajesh Sharma" class="w-full bg-charcoalDark border border-white/10 rounded-xl px-4 py-3 text-warmCream placeholder-warmCream/40 focus:outline-none focus:border-amberGold transition text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-warmCream/80 mb-2">Phone Number *</label>
+                                <input type="tel" id="res-phone" required placeholder="e.g. +91 98765 43210" class="w-full bg-charcoalDark border border-white/10 rounded-xl px-4 py-3 text-warmCream placeholder-warmCream/40 focus:outline-none focus:border-amberGold transition text-sm">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-warmCream/80 mb-2">Date *</label>
+                                <input type="date" id="res-date" required class="w-full bg-charcoalDark border border-white/10 rounded-xl px-4 py-3 text-warmCream focus:outline-none focus:border-amberGold transition text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-warmCream/80 mb-2">Time *</label>
+                                <select id="res-time" required class="w-full bg-charcoalDark border border-white/10 rounded-xl px-4 py-3 text-warmCream focus:outline-none focus:border-amberGold transition text-sm">
+                                    <option value="">Select Time</option>
+                                    <option value="12:00 PM">12:00 PM (Lunch)</option>
+                                    <option value="01:00 PM">01:00 PM (Lunch)</option>
+                                    <option value="02:00 PM">02:00 PM (Lunch)</option>
+                                    <option value="07:00 PM">07:00 PM (Dinner)</option>
+                                    <option value="08:00 PM">08:00 PM (Dinner)</option>
+                                    <option value="09:00 PM">09:00 PM (Dinner)</option>
+                                    <option value="10:00 PM">10:00 PM (Dinner)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-warmCream/80 mb-2">Guests *</label>
+                                <select id="res-guests" required class="w-full bg-charcoalDark border border-white/10 rounded-xl px-4 py-3 text-warmCream focus:outline-none focus:border-amberGold transition text-sm">
+                                    <option value="1 Person">1 Person</option>
+                                    <option value="2 Persons" selected>2 Persons</option>
+                                    <option value="4 Persons">4 Persons</option>
+                                    <option value="6 Persons">6 Persons</option>
+                                    <option value="8+ Persons">8+ Persons (Group)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-warmCream/80 mb-2">Special Requests / Occasion</label>
+                            <textarea id="res-notes" rows="3" placeholder="e.g. Birthday celebration, window seating preferred..." class="w-full bg-charcoalDark border border-white/10 rounded-xl px-4 py-3 text-warmCream placeholder-warmCream/40 focus:outline-none focus:border-amberGold transition text-sm"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-amberGold hover:bg-amberAccent text-charcoalDark font-bold py-4 rounded-xl transition shadow-lg text-center flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Confirm Table Reservation</span>
+                        </button>
+                    </form>
+                    <p class="text-xs text-warmCream/55 mt-5">Submitting opens WhatsApp with your request filled in. Please press Send in WhatsApp; the restaurant will confirm availability directly.</p>
+                </div>
+
+                <!-- Contact & Info Cards (5 Cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="bg-charcoalCard p-8 rounded-3xl border border-white/10 shadow-xl space-y-6">
+                        <h3 class="text-2xl font-playfair font-bold text-warmCream">Contact Information</h3>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 rounded-full bg-amberGold/10 text-amberGold flex items-center justify-center shrink-0 mt-1">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-warmCream text-sm">Address</h4>
+                                <p class="text-warmCream/70 text-sm mt-1">Khoje Restaurant, C Scheme, Ashok Nagar, Jaipur, Rajasthan 302001</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 rounded-full bg-amberGold/10 text-amberGold flex items-center justify-center shrink-0 mt-1">
+                                <i class="fa-solid fa-phone"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-warmCream text-sm">Phone Number</h4>
+                                <a href="tel:08690133358" class="text-amberGold font-semibold hover:underline text-sm mt-1 block">086901 33358</a>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 rounded-full bg-amberGold/10 text-amberGold flex items-center justify-center shrink-0 mt-1">
+                                <i class="fa-regular fa-clock"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-warmCream text-sm">Opening Hours</h4>
+                                <p class="text-warmCream/70 text-sm mt-1">Monday - Sunday: 10:00 AM – 11:00 PM</p>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-white/10 flex gap-4">
+                            <a href="tel:08690133358" class="flex-1 bg-amberGold hover:bg-amberAccent text-charcoalDark font-bold py-3 rounded-xl transition text-center text-sm flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-phone"></i>
+                                <span>Call Now</span>
+                            </a>
+                            <a href="https://maps.google.com/?q=Khoje+Restaurant+Jaipur" target="_blank" class="flex-1 bg-white/10 hover:bg-white/20 text-warmCream font-bold py-3 rounded-xl transition text-center text-sm flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-map"></i>
+                                <span>Google Maps</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Map Embed Container -->
+                    <div class="bg-charcoalCard rounded-3xl overflow-hidden border border-white/10 h-64 relative shadow-xl">
+                        <iframe title="Khoje Restaurant Jaipur Location" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3559.888796851245!2d75.8032177!3d26.9144855!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x396db572ff3b90af%3A0x79095d14f40436c8!2sKhoje%20Restaurant!5e0!3m2!1sen!2sin!4v1650000000000!5m2!1sen!2sin" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-charcoalCard border-t border-white/10 py-12 px-4 sm:px-6 lg:px-8 mt-20">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <div class="space-y-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amberDark to-amberGold flex items-center justify-center shadow-lg">
+                        <i class="fa-solid fa-utensils text-charcoalDark"></i>
+                    </div>
+                    <span class="text-xl font-playfair font-bold tracking-wider text-warmCream">KHOJE</span>
+                </div>
+                <p class="text-warmCream/60 text-sm">
+                    An exquisite culinary haven in C Scheme, Ashok Nagar, Jaipur. Rated 4.7/5 for exceptional food, ambience, and hospitality.
+                </p>
+            </div>
+
+            <div>
+                <h4 class="font-playfair font-bold text-warmCream text-lg mb-4">Quick Links</h4>
+                <ul class="space-y-2 text-sm text-warmCream/70">
+                    <li><button onclick="switchTab('home')" class="hover:text-amberGold transition">Home</button></li>
+                    <li><button onclick="switchTab('menu')" class="hover:text-amberGold transition">Interactive Menu</button></li>
+                    <li><button onclick="switchTab('about')" class="hover:text-amberGold transition">Our Story</button></li>
+                    <li><button onclick="switchTab('gallery')" class="hover:text-amberGold transition">Photo Gallery</button></li>
+                    <li><button onclick="switchTab('reservations')" class="hover:text-amberGold transition">Reservations & Contact</button></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-playfair font-bold text-warmCream text-lg mb-4">Contact Info</h4>
+                <ul class="space-y-2 text-sm text-warmCream/70">
+                    <li>C Scheme, Ashok Nagar, Jaipur, Rajasthan 302001</li>
+                    <li><a href="tel:08690133358" class="text-amberGold font-semibold hover:underline">086901 33358</a></li>
+                    <li>Open Daily: 10:00 AM – 11:00 PM</li>
+                    <li>Google Rating: 4.7 / 5 (588+ reviews)</li>
+                </ul>
+            </div></div>
+
+        <div class="max-w-7xl mx-auto pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-xs text-warmCream/50">
+            <p>&copy; 2026 Khoje Restaurant, Jaipur. All rights reserved.</p>
+            <p class="mt-2 sm:mt-0">Crafted with precision for fine dining excellence.</p>
+        </div>
+    </footer>
+<!-- JavaScript Application Logic -->
+    <script>
+        // Gallery photos supplied by the site owner.
+        const galleryItems = [
+            { category: "interior", title: "Restaurant dining area", image: "assets/12-interior-seating.jpg" },
+            { category: "food", title: "Food photograph", image: "assets/02-avocado-toast.jpg" },
+            { category: "food", title: "Food photograph", image: "assets/03-food-photo.jpg" },
+            { category: "food", title: "Rice bowl", image: "assets/04-rice-bowl.jpg" },
+            { category: "food", title: "Grilled food", image: "assets/05-grilled-food.jpg" },
+            { category: "food", title: "Noodle dish", image: "assets/06-noodles.jpg" },
+            { category: "food", title: "Bowl photograph", image: "assets/07-bowl.jpg" },
+            { category: "drinks", title: "Orange drink", image: "assets/08-orange-drink.jpg" },
+            { category: "food", title: "Pasta dish", image: "assets/09-pasta.jpg" },
+            { category: "food", title: "Burger and fries", image: "assets/10-burger.jpg" },
+            { category: "food", title: "Green pasta", image: "assets/11-green-pasta.jpg" },
+            { category: "interior", title: "Restaurant interior", image: "assets/13-interior-dining.jpg" },
+            { category: "interior", title: "Dining table", image: "assets/01-table-and-food.jpg" },
+            { category: "food", title: "Pasta photograph", image: "assets/14-pasta-bowl.jpg" }
+        ];
+
+        let currentGalleryCategory = 'all';
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-page').forEach(page => {
+                page.classList.add('hidden');
+            });
+
+            const targetPage = document.getElementById(`page-${tabId}`);
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+            }
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-amberGold', 'border-amberGold');
+                btn.classList.add('text-warmCream/80', 'border-transparent');
+            });
+
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.remove('text-warmCream/80', 'border-transparent');
+                activeNav.classList.add('text-amberGold', 'border-amberGold');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (tabId === 'gallery') {
+                renderGallery(galleryItems);
+            }
+        }
+
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Toast notification system
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto max-w-sm w-full bg-charcoalCard border ${type === 'success' ? 'border-amberGold' : 'border-red-500'} text-warmCream p-4 rounded-2xl shadow-2xl flex items-center space-x-3 transform transition-all duration-300 translate-y-2 opacity-0`;
+            
+            toast.innerHTML = `
+                <div class="w-8 h-8 rounded-full ${type === 'success' ? 'bg-amberGold/20 text-amberGold' : 'bg-red-500/20 text-red-500'} flex items-center justify-center shrink-0">
+                    <i class="fa-solid ${type === 'success' ? 'fa-check' : 'fa-triangle-exclamation'} text-xs"></i>
+                </div>
+                <div class="flex-grow text-sm font-medium">${message}</div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Render Gallery Items with Lightbox Trigger
+        function renderGallery(items) {
+            const grid = document.getElementById('gallery-grid');
+            if (!grid) return;
+
+            grid.innerHTML = items.map(item => `
+                <div onclick="openLightbox('${item.image}', '${item.title}')" class="relative h-72 rounded-3xl overflow-hidden group shadow-xl border border-white/5 cursor-pointer">
+                    <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-charcoalDark via-charcoalDark/30 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex flex-col justify-end p-6">
+                        <span class="text-amberGold text-xs font-bold uppercase tracking-widest mb-1">${item.category}</span>
+                        <h4 class="text-lg font-playfair font-bold text-warmCream flex items-center justify-between">
+                            <span>${item.title}</span>
+                            <i class="fa-solid fa-expand text-sm text-amberGold"></i>
+                        </h4>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filter Gallery
+        function filterGallery(cat) {
+            currentGalleryCategory = cat;
+
+            document.querySelectorAll('.gal-cat-btn').forEach(btn => {
+                btn.className = "gal-cat-btn px-5 py-2.5 rounded-xl text-sm font-semibold bg-charcoalCard text-warmCream/80 hover:text-amberGold border border-white/10 transition";
+            });
+            const activeBtn = document.getElementById(`gal-${cat}`);
+            if (activeBtn) {
+                activeBtn.className = "gal-cat-btn px-5 py-2.5 rounded-xl text-sm font-semibold bg-amberGold text-charcoalDark transition shadow-sm";
+            }
+
+            const filtered = cat === 'all' ? galleryItems : galleryItems.filter(item => item.category === cat);
+            renderGallery(filtered);
+        }
+
+        // Lightbox Functions
+        function openLightbox(imgSrc, title) {
+            const modal = document.getElementById('lightbox-modal');
+            const img = document.getElementById('lightbox-img');
+            const titleEl = document.getElementById('lightbox-title');
+            
+            img.src = imgSrc;
+            titleEl.textContent = title;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('lightbox-modal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        // Send the reservation request to WhatsApp for the customer to review and send.
+        function handleReservation(event) {
+            event.preventDefault();
+            const name = document.getElementById('res-name').value.trim();
+            const phone = document.getElementById('res-phone').value.trim();
+            const date = document.getElementById('res-date').value;
+            const time = document.getElementById('res-time').value;
+            const guests = document.getElementById('res-guests').value;
+            const notes = document.getElementById('res-notes').value.trim();
+            const message = [
+                'Hello Khoje Restaurant, I would like to request a table reservation.',
+                `Name: ${name}`,
+                `Contact number: ${phone}`,
+                `Date: ${date}`,
+                `Time: ${time}`,
+                `Number of guests: ${guests}`,
+                notes ? `Additional notes: ${notes}` : ''
+            ].filter(Boolean).join('\\n');
+            const whatsappUrl = `https://wa.me/918690133358?text=${encodeURIComponent(message)}`;
+            const opened = window.open(whatsappUrl, '_blank');
+            if (!opened) {
+                showToast('Your request is ready. If WhatsApp did not open, use the WhatsApp Chat link on this page.', 'error');
+            } else {
+                opened.opener = null;
+                showToast('WhatsApp opened with your request. Please press Send there; the restaurant must confirm your booking.');
+            }
+        }
+
+        // Initialize on Load
+        window.onload = function() {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('res-date');
+            if (dateInput) {
+                dateInput.value = today;
+                dateInput.min = today;
+            }
+
+            renderGallery(galleryItems);
+        };
+    </script>
+</body>
+</html>
